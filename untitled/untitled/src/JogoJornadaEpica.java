@@ -1,69 +1,90 @@
 import java.util.Scanner;
-import java.util.Random;
 
 public class JogoJornadaEpica {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Random random = new Random();
 
         System.out.println("Bem-vindo à Jornada Épica!");
         System.out.print("Digite o nome do seu personagem: ");
         String nome = scanner.nextLine();
-        System.out.print("Escolha sua classe (Guerreiro / Mago / Arqueiro): ");
+
+        System.out.print("\nEscolha sua classe (Guerreiro / Mago / Arqueiro): ");
         String classe = scanner.nextLine();
 
-        Personagem jogador = new Personagem(nome, classe);
+        System.out.print("\nEscolha sua raça (Humano / Elfo / Halfling): ");
+        String raca = scanner.nextLine();
+
+        // Criação do personagem
+        Personagem jogador = new Personagem(nome, classe, raca);
+        System.out.println("\nStatus inicial do personagem:");
         jogador.mostrarStatus();
 
-        System.out.println("Você encontrou um inimigo!");
+        // Primeira batalha
+        System.out.println("\nVocê encontrou um inimigo!");
         Inimigo inimigo = new Inimigo("Goblin", 50, 8);
 
         while (jogador.getVida() > 0 && inimigo.getVida() > 0) {
-            System.out.println("O que deseja fazer? (1) Atacar (2) Fugir");
+            System.out.println("\nO que deseja fazer?");
+            System.out.println("(1) Atacar");
+            System.out.println("(2) Fugir\n");
             int escolha = scanner.nextInt();
 
             if (escolha == 1) {
-                jogador.atacar(inimigo);
+                jogador.atacar(inimigo); // Jogador ataca o inimigo
                 if (inimigo.getVida() > 0) {
-                    inimigo.atacar(jogador);
+                    inimigo.atacar(jogador); // Inimigo ataca o jogador
                 }
             } else {
-                System.out.println("Você fugiu da batalha!");
+                System.out.println("\nVocê fugiu da batalha!");
                 break;
             }
+
+            // Mostrar status após cada rodada
+            System.out.println("\nStatus após a rodada:");
+            jogador.mostrarStatus();
+            System.out.println("Vida do inimigo: " + inimigo.getVida());
         }
 
+        // Resultado da primeira batalha
         if (jogador.getVida() > 0 && inimigo.getVida() <= 0) {
-            System.out.println("Você derrotou o inimigo!");
+            System.out.println("\nVocê derrotou o inimigo!");
             jogador.evoluir();
         } else if (jogador.getVida() <= 0) {
-            System.out.println("Game Over!");
+            System.out.println("\nGame Over!");
         }
 
-        // Segunda etapa do jogo
-        System.out.println("Você encontrou um novo inimigo!");
+        // Segunda batalha (inimigo mais forte)
+        System.out.println("\nVocê encontrou um novo inimigo!");
         Inimigo novoInimigo = new Inimigo("Orc", 70, 12);
 
         while (jogador.getVida() > 0 && novoInimigo.getVida() > 0) {
-            System.out.println("O que deseja fazer? (1) Atacar (2) Fugir");
+            System.out.println("\nO que deseja fazer?");
+            System.out.println("(1) Atacar");
+            System.out.println("(2) Fugir\n");
             int escolha = scanner.nextInt();
 
             if (escolha == 1) {
-                jogador.atacar(novoInimigo);
+                jogador.atacar(novoInimigo); // Jogador ataca o novo inimigo
                 if (novoInimigo.getVida() > 0) {
-                    novoInimigo.atacar(jogador);
+                    novoInimigo.atacar(jogador); // Novo inimigo ataca o jogador
                 }
             } else {
-                System.out.println("Você fugiu da batalha!");
+                System.out.println("\nVocê fugiu da batalha!");
                 break;
             }
+
+            // Mostrar status após cada rodada
+            System.out.println("\nStatus após a rodada:");
+            jogador.mostrarStatus();
+            System.out.println("Vida do novo inimigo: " + novoInimigo.getVida());
         }
 
+        // Resultado da segunda batalha
         if (jogador.getVida() > 0 && novoInimigo.getVida() <= 0) {
-            System.out.println("Você derrotou o novo inimigo!");
+            System.out.println("\nVocê derrotou o novo inimigo!");
             jogador.evoluir();
         } else if (jogador.getVida() <= 0) {
-            System.out.println("Game Over!");
+            System.out.println("\nGame Over!");
         }
 
         scanner.close();
