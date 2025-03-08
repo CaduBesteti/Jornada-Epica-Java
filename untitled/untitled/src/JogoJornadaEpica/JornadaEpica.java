@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -221,12 +222,15 @@ class Personagem {
         while (experiencia >= 100 && level < 10) {
             experiencia -= 100;
             level++;
-            vida += 20 + (sorte/2);
-            vidaMaxima = vida;
-            dano += 10 + (sorte/2);
-            System.out.println(nome + " subiu para o nível " + level + "! Vida +" + (20 + (sorte/2)) + ", Dano +" + (10 + (sorte/2)) + "!");
+            int aumentoVida = 20 + (sorte / 2);
+            vidaMaxima += aumentoVida;
+            vida = vidaMaxima; // Restaura a vida ao máximo ao subir de nível
+            dano += 10 + (sorte / 2);
+            System.out.println(nome + " subiu para o nível " + level + "! Vida +" + aumentoVida + ", Dano +" + (10 + (sorte / 2)) + "!");
         }
     }
+
+    // Método adicionado para corrigir o erro
     public int getVidaMaxima() {
         return vidaMaxima;
     }
@@ -359,12 +363,12 @@ class Batalha {
     // Adicionar recompensas em Berries para todos os inimigos
     int baseBerries;
     switch(inimigo.getNome()) {
-        case "Arlong": baseBerries = 50000; break;
-        case "Kuro": baseBerries = 30000; break;
-        case "Krieg": baseBerries = 40000; break;
-        case "Crocodile": baseBerries = 100000; break;
+        case "Kuro": baseBerries = 50000; break;
+        case "Krieg": baseBerries = 30000; break;
+        case "Arlong": baseBerries = 40000; break;
+        case "Mr. 2": baseBerries = 100000; break;
         case "Mr. 1": baseBerries = 60000; break;
-        case "Mr. 2": baseBerries = 70000; break;
+        case "Crocodile": baseBerries = 70000; break;
         case "Enel": baseBerries = 150000; break;
         case "Ohm": baseBerries = 80000; break;
         case "Satori": baseBerries = 90000; break;
@@ -380,9 +384,9 @@ class Batalha {
         case "Doflamingo": baseBerries = 400000; break;
         case "Pica": baseBerries = 200000; break;
         case "Diamante": baseBerries = 180000; break;
-        case "Kaido": baseBerries = 500000; break;
+        case "Queen": baseBerries = 500000; break;
         case "King": baseBerries = 300000; break;
-        case "Queen": baseBerries = 250000; break;
+        case "Kaido": baseBerries = 250000; break;
         default: baseBerries = 50000; // Recompensa padrão para inimigos não listados
     }
 
@@ -398,65 +402,85 @@ class Batalha {
 }
     }
 
-    private static void usarItem(Personagem personagem, Aliado aliado, Bag bag, Scanner scanner) {
-        System.out.println("\n=== Itens Disponíveis ===");
-        bag.mostrarItens();
+   private static void usarItem(Personagem personagem, Aliado aliado, Bag bag, Scanner scanner) {
+    System.out.println("\n=== Itens Disponíveis ===");
+    Map<String, Integer> itens = bag.getItens();
 
-        System.out.print("Escolha o nome do item que deseja usar (ou 'voltar' para cancelar): ");
-        scanner.nextLine(); // Limpar o buffer
-        String itemEscolhido = scanner.nextLine();
-
-        if (itemEscolhido.equalsIgnoreCase("voltar")) {
-            System.out.println("Voltando ao menu de batalha...");
-            return;
-        }
-
-        if (!bag.getItens().containsKey(itemEscolhido)) {
-            System.out.println("Item não encontrado na mochila!");
-            return;
-        }
-
-        // Verificar o tipo de item e aplicar efeitos
-        switch (itemEscolhido) {
-            case "Chapéu de Palha":
-                System.out.println("Você usou o Chapéu de Palha! Sorte aumentada temporariamente.");
-                personagem.equiparItem("Chapéu de Palha", 10); // Exemplo de bônus
-                break;
-            case "Clima-Tact":
-                System.out.println("Você usou o Clima-Tact! Defesa aumentada temporariamente.");
-                personagem.equiparItem("Clima-Tact", 15); // Exemplo de bônus
-                break;
-            case "Tonfas de Sanji":
-                System.out.println("Você usou as Tonfas de Sanji! Dano aumentado temporariamente.");
-                personagem.equiparItem("Tonfas de Sanji", 20); // Exemplo de bônus
-                break;
-            case "Violino de Brook":
-                System.out.println("Você usou o Violino de Brook! Sorte aumentada temporariamente.");
-                personagem.equiparItem("Violino de Brook", 10); // Exemplo de bônus
-                break;
-            case "Poção de Cura Pequena":
-                int curaPequena = 20;
-                personagem.setVida(Math.min(personagem.getVida() + curaPequena, personagem.getVidaMaxima()));
-                System.out.println("Você usou uma Poção de Cura Pequena e recuperou " + curaPequena + " HP!");
-                break;
-            case "Poção de Cura Média":
-                int curaMedia = 50;
-                personagem.setVida(Math.min(personagem.getVida() + curaMedia, personagem.getVidaMaxima()));
-                System.out.println("Você usou uma Poção de Cura Média e recuperou " + curaMedia + " HP!");
-                break;
-            case "Poção de Cura Grande":
-                int curaGrande = 100;
-                personagem.setVida(Math.min(personagem.getVida() + curaGrande, personagem.getVidaMaxima()));
-                System.out.println("Você usou uma Poção de Cura Grande e recuperou " + curaGrande + " HP!");
-                break;
-            default:
-                System.out.println("Este item não tem efeito especial.");
-                break;
-        }
-
-        // Remover o item da mochila após o uso
-        bag.removerItem(itemEscolhido, 1);
+    if (itens.isEmpty()) {
+        System.out.println("Sua mochila está vazia!");
+        return; // Corrigido: removido o "s" após o return
     }
+
+    // Exibir itens numerados
+    int index = 1;
+    Map<Integer, String> itensNumerados = new HashMap<>();
+    for (Map.Entry<String, Integer> entry : itens.entrySet()) {
+        String item = entry.getKey();
+        int quantidade = entry.getValue();
+        System.out.println(index + ". " + item + " (" + quantidade + "x)");
+        itensNumerados.put(index, item);
+        index++;
+    }
+
+    System.out.print("Escolha o número do item que deseja usar (ou 0 para cancelar): ");
+    int escolha = scanner.nextInt();
+
+    if (escolha == 0) {
+        System.out.println("Voltando ao menu de batalha...");
+        return;
+    }
+
+    if (!itensNumerados.containsKey(escolha)) {
+        System.out.println("Opção inválida!");
+        return;
+    }
+
+    String itemEscolhido = itensNumerados.get(escolha);
+
+    // Verificar o tipo de item e aplicar efeitos
+    switch (itemEscolhido) {
+        case "Chapéu de Palha":
+            System.out.println("Você usou o Chapéu de Palha! Sorte aumentada.");
+            personagem.equiparItem("Chapéu de Palha", 10);
+            break;
+        case "Clima-Tact":
+            System.out.println("Você usou o Clima-Tact! Defesa aumentada.");
+            personagem.equiparItem("Clima-Tact", 15);
+            break;
+        case "Tonfas de Sanji":
+            System.out.println("Você usou as Tonfas de Sanji! Dano aumentado.");
+            personagem.equiparItem("Tonfas de Sanji", 20);
+            break;
+        case "Violino de Brook":
+            System.out.println("Você usou o Violino de Brook! Sorte aumentada.");
+            personagem.equiparItem("Violino de Brook", 10);
+            break;
+        case "Poção de Cura Pequena":
+            int curaPequena = 20;
+            int novaVidaPequena = personagem.getVida() + curaPequena;
+            personagem.setVida(Math.min(novaVidaPequena, personagem.getVidaMaxima()));
+            System.out.println("Você usou uma Poção de Cura Pequena e recuperou " + curaPequena + " HP!");
+            break;
+        case "Poção de Cura Média":
+            int curaMedia = 50;
+            int novaVidaMedia = personagem.getVida() + curaMedia;
+            personagem.setVida(Math.min(novaVidaMedia, personagem.getVidaMaxima()));
+            System.out.println("Você usou uma Poção de Cura Média e recuperou " + curaMedia + " HP!");
+            break;
+        case "Poção de Cura Grande":
+            int curaGrande = 100;
+            int novaVidaGrande = personagem.getVida() + curaGrande;
+            personagem.setVida(Math.min(novaVidaGrande, personagem.getVidaMaxima()));
+            System.out.println("Você usou uma Poção de Cura Grande e recuperou " + curaGrande + " HP!");
+            break;
+        default:
+            System.out.println("Este item não tem efeito especial.");
+            break;
+    }
+
+    // Remover o item da mochila após o uso
+    bag.removerItem(itemEscolhido, 1);
+}
 }
 class Exploracao {
     private static final String[] ILHAS = {
@@ -465,34 +489,33 @@ class Exploracao {
     };
 
     private static final String[][] INIMIGOS_POR_ILHA = {
-        {"Arlong", "Kuro", "Krieg"},
-        {"Crocodile", "Mr. 1", "Mr. 2"},
-        {"Enel", "Ohm", "Satori"},
-        {"Lucci", "Kaku", "Blueno"},
-        {"Moria", "Absalom", "Hogback"},
-        {"Akainu", "Kizaru", "Aokiji"},
-        {"Doflamingo", "Pica", "Diamante"},
-        {"Kaido", "King", "Queen"}
+        {"Kuro", "Krieg", "Arlong"},
+        {"Mr.2", "Mr. 1", "Crocodile"},
+        {"Satori", "Ohm", "Enel"},
+        {"Blueno", "Kaku", "Lucci"},
+        {"Hogback", "Absalom", "Moria"},
+        {"Aokiji", "Kizaru", "Akainu"},
+        {"Diamante", "Pica", "Doflamingo"},
+        {"Queen", "King", "Kaido"}
     };
 
 private static void acessarLoja(Personagem personagem, Bag bag, Scanner scanner, int ilhaAtual) {
     System.out.println("\n=== Loja do Rayleigh - Nível " + (ilhaAtual + 1) + " ===");
     System.out.println("Itens disponíveis:");
 
-    Map<String, Object[]> itens = new HashMap<>();
-    itens.put("1", new Object[]{50000, 5, "Chapéu de Palha (Passivo)"});
-    itens.put("2", new Object[]{120000, 15, "Wado Ichimonji (Passivo)"});
-    itens.put("3", new Object[]{80000, 10, "Clima-Tact (Passivo)"});
-    itens.put("4", new Object[]{75000, 12, "Tonfas de Sanji (Passivo)"});
-    itens.put("5", new Object[]{60000, 8, "Violino de Brook (Passivo)"});
-    itens.put("6", new Object[]{300000, 25, "Espada Shusui (Passivo)"});
-    itens.put("7", new Object[]{250000, 20, "Armadura de Germa 66 (Passivo)"});
-    itens.put("8", new Object[]{150000, 15, "Mapa do Novo Mundo (Passivo)"});
-    itens.put("9", new Object[]{500000, 40, "Titanic Captain's Cannon (Passivo)"});
-    // Adicionando as poções
-    itens.put("10", new Object[]{1000, 20, "Poção de Cura Pequena (Consumivel)"});
-    itens.put("11", new Object[]{2500, 50, "Poção de Cura Média (Consumivel)"});
-    itens.put("12", new Object[]{5000, 100, "Poção de Cura Grande (Consumivel)"});
+    Map<String, Object[]> itens = new LinkedHashMap<>();
+    itens.put("1", new Object[]{50000, 5, "Chapéu de Palha"});
+    itens.put("2", new Object[]{120000, 15, "Wado Ichimonji"});
+    itens.put("3", new Object[]{80000, 10, "Clima-Tact"});
+    itens.put("4", new Object[]{75000, 12, "Tonfas de Sanji"});
+    itens.put("5", new Object[]{60000, 8, "Violino de Brook"});
+    itens.put("6", new Object[]{300000, 25, "Espada Shusui"});
+    itens.put("7", new Object[]{250000, 20, "Armadura de Germa 66"});
+    itens.put("8", new Object[]{150000, 15, "Mapa do Novo Mundo"});
+    itens.put("9", new Object[]{500000, 40, "Titanic Captain's Cannon"});
+    itens.put("10", new Object[]{1000, 20, "Poção de Cura Pequena"});
+    itens.put("11", new Object[]{2500, 50, "Poção de Cura Média"});
+    itens.put("12", new Object[]{5000, 100, "Poção de Cura Grande"});
 
     itens.forEach((key, valores) -> {
         int preco = (int) valores[0] * (ilhaAtual + 1);
